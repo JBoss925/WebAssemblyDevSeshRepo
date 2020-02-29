@@ -1515,6 +1515,9 @@
    local.get $3
    local.set $0
   else
+   i32.const 1
+   memory.grow
+   drop
    i32.const 800
    local.get $0
    i32.store

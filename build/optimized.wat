@@ -1168,6 +1168,9 @@
     call $~lib/rt/pure/__release
    end
   else
+   i32.const 1
+   memory.grow
+   drop
    i32.const 800
    local.get $0
    i32.store
