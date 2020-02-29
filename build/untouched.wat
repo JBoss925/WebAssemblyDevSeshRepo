@@ -1,25 +1,31 @@
 (module
  (type $i32_i32_=>_none (func (param i32 i32)))
- (type $i32_=>_none (func (param i32)))
  (type $i32_i32_=>_i32 (func (param i32 i32) (result i32)))
  (type $i32_=>_i32 (func (param i32) (result i32)))
  (type $i32_i32_i32_=>_i32 (func (param i32 i32 i32) (result i32)))
+ (type $i32_=>_none (func (param i32)))
  (type $none_=>_none (func))
  (type $i32_i32_i32_=>_none (func (param i32 i32 i32)))
  (type $i32_i32_i32_i32_=>_none (func (param i32 i32 i32 i32)))
  (type $none_=>_i32 (func (result i32)))
+ (type $i32_i32_i32_i32_=>_i32 (func (param i32 i32 i32 i32) (result i32)))
  (import "env" "abort" (func $~lib/builtins/abort (param i32 i32 i32 i32)))
  (memory $0 1)
  (data (i32.const 16) "\1e\00\00\00\01\00\00\00\01\00\00\00\1e\00\00\00~\00l\00i\00b\00/\00r\00t\00/\00t\00l\00s\00f\00.\00t\00s\00")
  (data (i32.const 64) "(\00\00\00\01\00\00\00\01\00\00\00(\00\00\00a\00l\00l\00o\00c\00a\00t\00i\00o\00n\00 \00t\00o\00o\00 \00l\00a\00r\00g\00e\00")
  (data (i32.const 128) "\1e\00\00\00\01\00\00\00\01\00\00\00\1e\00\00\00~\00l\00i\00b\00/\00r\00t\00/\00p\00u\00r\00e\00.\00t\00s\00")
- (data (i32.const 176) "\03\00\00\00\10\00\00\00\00\00\00\00\10\00\00\00\00\00\00\00\10\00\00\00\00\00\00\00")
+ (data (i32.const 176) "$\00\00\00\01\00\00\00\01\00\00\00$\00\00\00I\00n\00d\00e\00x\00 \00o\00u\00t\00 \00o\00f\00 \00r\00a\00n\00g\00e\00")
+ (data (i32.const 240) "\1a\00\00\00\01\00\00\00\01\00\00\00\1a\00\00\00~\00l\00i\00b\00/\00a\00r\00r\00a\00y\00.\00t\00s\00")
+ (data (i32.const 288) "\04\00\00\00\10\00\00\00\00\00\00\00\10\00\00\00\00\00\00\00\10\00\00\00\00\00\00\00\93\04\00\00\02\00\00\00")
  (table $0 1 funcref)
  (global $~lib/rt/tlsf/ROOT (mut i32) (i32.const 0))
  (global $~lib/rt/tlsf/collectLock (mut i32) (i32.const 0))
  (global $~lib/gc/gc.auto (mut i32) (i32.const 1))
- (global $~lib/rt/__rtti_base i32 (i32.const 176))
- (global $~lib/heap/__heap_base i32 (i32.const 204))
+ (global $assembly/index/didStore1 (mut i32) (i32.const 0))
+ (global $assembly/index/didStore (mut i32) (i32.const 0))
+ (global $~lib/builtins/i32.MAX_VALUE i32 (i32.const 2147483647))
+ (global $~lib/rt/__rtti_base i32 (i32.const 288))
+ (global $~lib/heap/__heap_base i32 (i32.const 324))
  (export "memory" (memory $0))
  (export "__alloc" (func $~lib/rt/tlsf/__alloc))
  (export "__retain" (func $~lib/rt/pure/__retain))
@@ -27,6 +33,9 @@
  (export "__collect" (func $~lib/rt/pure/__collect))
  (export "__rtti_base" (global $~lib/rt/__rtti_base))
  (export "test" (func $assembly/index/test))
+ (export "fibAssembly" (func $assembly/index/fibAssembly))
+ (export "strHeavyTest" (func $assembly/index/strHeavyTest))
+ (export "memHeavyTest" (func $assembly/index/memHeavyTest))
  (func $~lib/rt/tlsf/removeBlock (; 1 ;) (param $0 i32) (param $1 i32)
   (local $2 i32)
   (local $3 i32)
@@ -1464,10 +1473,273 @@
   local.get $1
   i32.add
  )
- (func $~lib/rt/pure/__collect (; 15 ;)
+ (func $assembly/index/fibAssembly (; 15 ;) (param $0 i32) (result i32)
+  local.get $0
+  i32.const 2
+  i32.lt_s
+  if (result i32)
+   i32.const 1
+  else
+   local.get $0
+   i32.const 1
+   i32.sub
+   call $assembly/index/fibAssembly
+   local.get $0
+   i32.const 2
+   i32.sub
+   call $assembly/index/fibAssembly
+   i32.add
+  end
+ )
+ (func $assembly/index/strHeavyTest (; 16 ;) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+  (local $3 i32)
+  (local $4 i32)
+  local.get $0
+  call $~lib/rt/pure/__retain
+  local.set $0
+  global.get $assembly/index/didStore1
+  if
+   i32.const 800
+   i32.load
+   local.tee $3
+   local.get $0
+   local.tee $4
+   i32.ne
+   if
+    local.get $3
+    call $~lib/rt/pure/__retain
+    local.set $3
+    local.get $4
+    call $~lib/rt/pure/__release
+   end
+   local.get $3
+   local.set $0
+  else
+   i32.const 800
+   local.get $0
+   i32.store
+   i32.const 1
+   global.set $assembly/index/didStore1
+  end
+  local.get $1
+  local.get $2
+  i32.ge_s
+  if
+   local.get $0
+   return
+  end
+  local.get $0
+  local.get $1
+  i32.const 1
+  i32.add
+  local.get $2
+  call $assembly/index/strHeavyTest
+  local.set $3
+  local.get $0
+  call $~lib/rt/pure/__release
+  local.get $3
+ )
+ (func $~lib/array/Array<i32>#get:length (; 17 ;) (param $0 i32) (result i32)
+  local.get $0
+  i32.load offset=12
+ )
+ (func $~lib/array/Array<i32>#__unchecked_get (; 18 ;) (param $0 i32) (param $1 i32) (result i32)
+  local.get $0
+  i32.load offset=4
+  local.get $1
+  i32.const 2
+  i32.shl
+  i32.add
+  i32.load
+ )
+ (func $~lib/array/Array<i32>#__get (; 19 ;) (param $0 i32) (param $1 i32) (result i32)
+  (local $2 i32)
+  local.get $1
+  local.get $0
+  i32.load offset=12
+  i32.ge_u
+  if
+   i32.const 192
+   i32.const 256
+   i32.const 93
+   i32.const 41
+   call $~lib/builtins/abort
+   unreachable
+  end
+  local.get $0
+  local.get $1
+  call $~lib/array/Array<i32>#__unchecked_get
+  local.set $2
+  local.get $2
+ )
+ (func $~lib/array/Array<i32>#fill (; 20 ;) (param $0 i32) (param $1 i32) (param $2 i32) (param $3 i32) (result i32)
+  (local $4 i32)
+  (local $5 i32)
+  (local $6 i32)
+  (local $7 i32)
+  local.get $0
+  i32.load offset=4
+  local.set $4
+  local.get $0
+  i32.load offset=12
+  local.set $5
+  local.get $2
+  i32.const 0
+  i32.lt_s
+  if (result i32)
+   local.get $5
+   local.get $2
+   i32.add
+   local.tee $6
+   i32.const 0
+   local.tee $7
+   local.get $6
+   local.get $7
+   i32.gt_s
+   select
+  else
+   local.get $2
+   local.tee $6
+   local.get $5
+   local.tee $7
+   local.get $6
+   local.get $7
+   i32.lt_s
+   select
+  end
+  local.set $2
+  local.get $3
+  i32.const 0
+  i32.lt_s
+  if (result i32)
+   local.get $5
+   local.get $3
+   i32.add
+   local.tee $6
+   i32.const 0
+   local.tee $7
+   local.get $6
+   local.get $7
+   i32.gt_s
+   select
+  else
+   local.get $3
+   local.tee $6
+   local.get $5
+   local.tee $7
+   local.get $6
+   local.get $7
+   i32.lt_s
+   select
+  end
+  local.set $3
+  loop $for-loop|0
+   local.get $2
+   local.get $3
+   i32.lt_s
+   local.set $6
+   local.get $6
+   if
+    local.get $4
+    local.get $2
+    i32.const 2
+    i32.shl
+    i32.add
+    local.get $1
+    i32.store
+    local.get $2
+    i32.const 1
+    i32.add
+    local.set $2
+    br $for-loop|0
+   end
+  end
+  local.get $0
+  call $~lib/rt/pure/__retain
+ )
+ (func $assembly/index/memHeavyTest (; 21 ;) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+  (local $3 i32)
+  (local $4 i32)
+  (local $5 i32)
+  (local $6 i32)
+  local.get $0
+  call $~lib/rt/pure/__retain
+  local.set $0
+  global.get $assembly/index/didStore
+  if
+   i32.const 0
+   i32.load
+   call $~lib/rt/pure/__retain
+   local.set $3
+   i32.const 0
+   local.set $4
+   i32.const 0
+   local.set $5
+   loop $for-loop|0
+    local.get $5
+    local.get $3
+    call $~lib/array/Array<i32>#get:length
+    i32.lt_s
+    local.set $6
+    local.get $6
+    if
+     local.get $4
+     local.get $3
+     local.get $5
+     call $~lib/array/Array<i32>#__get
+     i32.add
+     local.set $4
+     local.get $5
+     i32.const 1
+     i32.add
+     local.set $5
+     br $for-loop|0
+    end
+   end
+   local.get $3
+   local.get $4
+   i32.const 0
+   global.get $~lib/builtins/i32.MAX_VALUE
+   call $~lib/array/Array<i32>#fill
+   local.set $6
+   local.get $3
+   call $~lib/rt/pure/__release
+   local.get $6
+   local.set $3
+   local.get $3
+   call $~lib/rt/pure/__release
+  else
+   i32.const 1
+   memory.grow
+   drop
+  end
+  local.get $1
+  local.get $2
+  i32.ge_s
+  if
+   local.get $0
+   return
+  end
+  i32.const 0
+  local.get $0
+  i32.store
+  i32.const 1
+  global.set $assembly/index/didStore
+  local.get $0
+  local.get $1
+  i32.const 1
+  i32.add
+  local.get $2
+  call $assembly/index/memHeavyTest
+  local.set $4
+  local.get $0
+  call $~lib/rt/pure/__release
+  local.get $4
+ )
+ (func $~lib/rt/pure/__collect (; 22 ;)
   return
  )
- (func $~lib/rt/tlsf/freeBlock (; 16 ;) (param $0 i32) (param $1 i32)
+ (func $~lib/rt/tlsf/freeBlock (; 23 ;) (param $0 i32) (param $1 i32)
   (local $2 i32)
   local.get $1
   i32.load
@@ -1481,7 +1753,7 @@
   local.get $1
   call $~lib/rt/tlsf/insertBlock
  )
- (func $~lib/rt/pure/decrement (; 17 ;) (param $0 i32)
+ (func $~lib/rt/pure/decrement (; 24 ;) (param $0 i32)
   (local $1 i32)
   (local $2 i32)
   local.get $0
@@ -1556,7 +1828,7 @@
    i32.store offset=4
   end
  )
- (func $~lib/rt/pure/__visit (; 18 ;) (param $0 i32) (param $1 i32)
+ (func $~lib/rt/pure/__visit (; 25 ;) (param $0 i32) (param $1 i32)
   local.get $0
   global.get $~lib/heap/__heap_base
   i32.lt_u
@@ -1580,29 +1852,41 @@
   i32.sub
   call $~lib/rt/pure/decrement
  )
- (func $~lib/rt/__visit_members (; 19 ;) (param $0 i32) (param $1 i32)
+ (func $~lib/array/Array<i32>#__visit_impl (; 26 ;) (param $0 i32) (param $1 i32)
+  nop
+ )
+ (func $~lib/rt/__visit_members (; 27 ;) (param $0 i32) (param $1 i32)
   (local $2 i32)
-  block $switch$1$default
-   block $switch$1$case$4
-    block $switch$1$case$2
-     local.get $0
-     i32.const 8
-     i32.sub
-     i32.load
-     br_table $switch$1$case$2 $switch$1$case$2 $switch$1$case$4 $switch$1$default
+  block $block$4$break
+   block $switch$1$default
+    block $switch$1$case$5
+     block $switch$1$case$4
+      block $switch$1$case$2
+       local.get $0
+       i32.const 8
+       i32.sub
+       i32.load
+       br_table $switch$1$case$2 $switch$1$case$2 $switch$1$case$4 $switch$1$case$5 $switch$1$default
+      end
+      return
+     end
+     br $block$4$break
     end
-    return
-   end
-   local.get $0
-   i32.load
-   local.tee $2
-   if
-    local.get $2
+    local.get $0
     local.get $1
-    call $~lib/rt/pure/__visit
+    call $~lib/array/Array<i32>#__visit_impl
+    br $block$4$break
    end
-   return
+   unreachable
   end
-  unreachable
+  local.get $0
+  i32.load
+  local.tee $2
+  if
+   local.get $2
+   local.get $1
+   call $~lib/rt/pure/__visit
+  end
+  return
  )
 )
